@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://vigia-backend.onrender.com'
+  apiUrl: 'https://rfp-agilismo-backend.onrender.com'
 };
