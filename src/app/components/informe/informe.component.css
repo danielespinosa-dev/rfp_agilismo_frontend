@@ -1,0 +1,39 @@
+body {
+  background-color: #1e1e1e;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+}
+
+.report-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.report-card {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.report-score {
+  font-size: 1.2em;
+  color: #4caf50;
+  margin-bottom: 10px;
+}
+
+.subcriteria {
+  font-size: 0.85em;
+  margin-top: 8px;
+}
+
+.subcriteria strong {
+  color: #ff007f;
+}
+
+canvas {
+  background: #222;
+  border-radius: 10px;
+  padding: 10px;
+}

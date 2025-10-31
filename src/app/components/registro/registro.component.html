@@ -1,0 +1,69 @@
+<div class="form-center">
+  <div class="card">
+    <h2>Registrar nueva solicitud</h2>
+    <p><em>Los archivos cargados serán analizados por asistentes de IA especializados.</em></p>
+    <form id="registroForm" #registroForm="ngForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Sección 1: Datos del proyecto y proveedor -->
+      <fieldset class="form-section">
+        <legend>Datos del Proyecto y Proveedor</legend>
+        <input type="text" [(ngModel)]="codigo" name="codigo" placeholder="Código de Proyecto" required>
+        <input type="text" [(ngModel)]="nit" name="nit" placeholder="NIT del Proveedor" required>
+        <input type="text" [(ngModel)]="proveedor" name="proveedor" placeholder="Nombre del Proveedor" required>
+
+        <label for="tipoRfp">Tipo RFP:</label>
+        <select [(ngModel)]="tipoRfp" name="tipoRfp" id="tipoRfp" required>
+          <option value="" disabled selected>Selecciona el tipo de RFP</option>
+          <option value="agilismo">RFP Agilismo</option>
+        </select>
+      </fieldset>
+
+      <!-- Sección 2: Carga de archivos -->
+      <fieldset class="form-section">
+        <legend>Carga de Archivos</legend>
+        <label for="rfpFile">Archivo de RFP (Excel):</label>
+        <input type="file" (change)="onFileChange($event)" accept=".xlsx" required name="rfpFile" ngModel>
+        
+        <label for="anexos">Anexos del Proveedor:</label>
+        <!-- Área de arrastrar y soltar -->
+        <div id="dropzone" class="dropzone" (click)="fileInput.click()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+          <p>Arrastra y suelta tus anexos aquí o haz clic para seleccionarlos</p>
+          <input type="file" #fileInput (change)="onFilesSelected($event)" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" hidden required>
+        </div>
+        <ul id="fileList">
+          <li *ngFor="let file of selectedFiles">✔ {{ file.name }}</li>
+        </ul>
+      </fieldset>
+
+      <button type="submit" class="btn" [disabled]="loading || registroForm.invalid || selectedFiles?.length === 0">Enviar</button>
+      <div *ngIf="loading" class="loading-spinner">
+        <span class="spinner-dot"></span>
+        <span class="spinner-dot"></span>
+        <span class="spinner-dot"></span>
+        <span class="spinner-dot"></span>
+        Enviando...
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Modal simple -->
+<div *ngIf="modalVisible" class="modal">
+  <div class="modal-content">
+    <span (click)="modalVisible = false" class="close">&times;</span>
+    <p class="procesando-msg">
+      <strong>¡Eval-IA ya inició el procesamiento de la revisión!</strong>
+    </p>
+    <p class="procesando-msg">
+      <strong>
+    Monitorea su progreso a través del 
+    <a routerLink="/estado" class="estado-link">módulo de estado</a>.
+  </strong>
+    </p>
+    <div class="loading-spinner">
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+      <div class="spinner-dot"></div>
+    </div>
+    <p>{{ modalMessage }}</p>
+  </div>
+</div>

@@ -1,0 +1,212 @@
+<div>
+  <h2>Consultar Solicitudes</h2>
+  <p><em>Los estados muestran el avance de la validación realizada por asistentes IA en cada dimensión.</em></p>
+  <form (submit)="searchSolicitudes()" class="search-form">
+  <input type="text" [(ngModel)]="searchProveedor" placeholder="🔍 Proveedor" class="search-input">
+  <input type="text" [(ngModel)]="searchNIT" placeholder="🆔 NIT" class="search-input">
+  <button type="submit" class="btn">Buscar</button>
+</form>
+<div *ngIf="loading" class="loading-spinner">
+  <span class="spinner-dot"></span>
+  <span class="spinner-dot"></span>
+  <span class="spinner-dot"></span>
+  <span class="spinner-dot"></span>
+  Cargando...
+</div>
+  <table *ngIf="solicitudes.length > 0">
+    <thead>
+      <tr>
+        
+        <th>Código Proyecto</th>
+        <th>Proveedor</th>
+        <th>NIT</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let solicitud of solicitudesFiltradas">
+       
+        <td>{{ solicitud.CodigoProyecto }}</td>
+        <td>{{ solicitud.ProveedorNombre }}</td>
+        <td>{{ solicitud.ProveedorNIT }}</td>
+        <td>{{ solicitud.FechaCreacion | date:'short' }}</td>
+        <td>{{ solicitud.FechaFinalizacion | date:'short' }}</td>
+        <td class="status">{{ solicitud.EstadoGeneral }}</td>
+        <td>
+          <a (click)="verInforme(solicitud.SolicitudID)" class="btn">Ver Informe</a>
+          <button (click)="eliminarSolicitud(solicitud.SolicitudID)" class="btn btn-danger" style="margin-left:8px;">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="solicitudes.length === 0">No se encontraron solicitudes.</p>
+</div>
+<!-- Agrega esto al final de tu estado.component.html -->
+<div *ngIf="informeVisible" class="modal">
+  <div class="modal-content informe-modal">
+    <span class="close" (click)="cerrarInforme()">&times;</span>
+    <h2>Informe de Solicitud</h2>
+    <div class="tabs">
+      <button [class.active]="informeTab==='resumen'" (click)="informeTab='resumen'">Resumen</button>
+      <button [class.active]="informeTab==='reporte-analisis'" (click)="informeTab='reporte-analisis'">Análisis IA</button>
+      <button [class.active]="informeTab==='resultado-analisis'" (click)="informeTab='resultado-analisis'">Resultado Análisis</button>
+      <button class="btn" style="margin-left:auto;" (click)="imprimirInformeCompleto()">Imprimir Sección</button>
+    </div>
+    <div id="modal-informe-completo"> 
+    <div *ngIf="informeTab==='resumen'">
+      <table class="info-table">
+        <tr><th>Código Proyecto</th><td>{{informeData.CodigoProyecto}}</td></tr>
+        <tr><th>Proveedor</th><td>{{informeData.ProveedorNombre}}</td></tr>
+        <tr><th>NIT</th><td>{{informeData.ProveedorNIT}}</td></tr>
+        <tr><th>Fecha Creación</th><td>{{informeData.FechaCreacion | date:'medium'}}</td></tr>
+        <tr><th>Estado General</th><td>{{informeData.EstadoGeneral}}</td></tr>
+        <tr><th>Usuario Solicitante</th><td>{{informeData.UsuarioSolicitante}}</td></tr>
+        <tr><th>Archivo Excel</th><td>{{informeData.FuenteExcelPath}}</td></tr>
+        <tr><th>Anexos</th><td>
+          <ul>
+            <li *ngFor="let anexo of informeData.Anexos">{{anexo.filename}}</li>
+          </ul>
+        </td></tr>
+        <tr>
+          <th>Estado Dimensiones</th>
+          <td>
+            <span class="badge ambiental" [class.done]="informeData.Estado?.ambiental==='done'">Ambiental</span>
+            <span class="badge social" [class.done]="informeData.Estado?.social==='done'">Social</span>
+            <span class="badge economica" [class.done]="informeData.Estado?.economica==='done'">Económica</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div *ngIf="informeTab==='reporte-analisis'" id="reporte-analisis">
+      <img src="assets/LogoReporte.png" alt="SostenIA" class="asistente-img">
+      <h3>Análisis IA:</h3>
+      <span [innerHTML]="formatRespuesta(informeData.Respuesta)"></span>
+    </div>
+    <div *ngIf="informeTab==='resultado-analisis'" id="resultado-analisis">
+  <h3>Resultado Detallado</h3>
+  <ng-container *ngIf="informeData?.Evaluacion?.length > 0">
+    <ng-container *ngIf="informeData.Evaluacion[0].required_action.submit_tool_outputs.tool_calls[0].function.arguments | parseArguments as args">
+      <table class="informe-table">
+        <thead>
+          <tr>
+            <th colspan="6" class="table-title">Criterios Evaluados</th>
+          </tr>
+          <tr>
+            <th>Criterio</th>
+            <th>Porcentaje Cumplimiento</th>
+            <th>Porcentaje Máximo</th>
+            <th>Comentario</th>
+            <th>Subcriterios</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let criterio of args.criterios">
+            <td><b>{{criterio.nombre}}</b></td>
+            <td>{{criterio.porcentaje_cumplimiento}}</td>
+            <td>{{criterio.porcentaje_maximo}}</td>
+            <td>{{criterio.comentario}}</td>
+            <td>
+              <table class="subcriterios-table">
+                <thead>
+                  <tr>
+                    <th>Subcriterio</th>
+                    <th>Porcentaje</th>
+                    <th>Comentario</th>
+                    <th>Evidencias</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let sub of criterio.subcriterios">
+                    <td>{{sub.nombre}}</td>
+                    <td>{{sub.porcentaje_cumplimiento}} / {{sub.porcentaje_maximo}}</td>
+                    <td>{{sub.comentario}}</td>
+                    <td>
+                      <ul>
+                        <li *ngFor="let evidencia of sub.evidencias">
+                          {{evidencia.filename}} (Confianza: {{evidencia.confidence_score}})
+                        </li>
+                      </ul>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
+            <th class="table-title">Conclusiones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of args.conclusiones">
+            <td>{{c}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
+            <th colspan="2" class="table-title">Preguntas para Proveedor</th>
+          </tr>
+          <tr>
+            <th>Pregunta</th>
+            <th>Prioridad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of args.preguntas">
+            <td>{{p.texto}}</td>
+            <td><span class="badge">{{p.prioridad}}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
+            <th colspan="3" class="table-title">Archivos Revisados</th>
+          </tr>
+          <tr>
+            <th>Archivo</th>
+            <th>Descripción</th>
+            <th>Confianza</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of args.archivos_revisados">
+            <td>{{a.filename}}</td>
+            <td>{{a.descripcion_contenido_archivo}}</td>
+            <td>{{a.confidence_score}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
+            <th colspan="2" class="table-title">Puntaje Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Ponderado:</b></td>
+            <td>{{args.total_porcentaje_cumplimiento}}</td>
+          </tr>
+          <tr>
+            <td><b>Escala 10:</b></td>
+            <td>{{args.total_escala_10}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </ng-container>
+</div>
+  </div>

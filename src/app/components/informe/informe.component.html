@@ -1,0 +1,39 @@
+<div class="report-section">
+  <div class="report-card">
+    <h3>Económica y Gobernanza - {{ informe?.economica?.puntaje }}%</h3>
+    <p class="report-score">Nivel: {{ informe?.economica?.nivel }}</p>
+    <div class="subcriteria">
+      <p *ngFor="let sub of informe?.economica?.subcriterios">
+        <strong>{{ sub.nombre }}:</strong> {{ sub.puntaje }}% - Recomendación: {{ sub.recomendacion }}.
+      </p>
+    </div>
+    <canvas id="chartEco"></canvas>
+  </div>
+  <div class="report-card">
+    <h3>Social - {{ informe?.social?.puntaje }}%</h3>
+    <p class="report-score">Nivel: {{ informe?.social?.nivel }}</p>
+    <div class="subcriteria">
+      <p *ngFor="let sub of informe?.social?.subcriterios">
+        <strong>{{ sub.nombre }}:</strong> {{ sub.puntaje }}% - Recomendación: {{ sub.recomendacion }}.
+      </p>
+    </div>
+    <canvas id="chartSocial"></canvas>
+  </div>
+  <div class="report-card">
+    <h3>Ambiental - {{ informe?.ambiental?.puntaje }}%</h3>
+    <p class="report-score">Nivel: {{ informe?.ambiental?.nivel }}</p>
+    <div class="subcriteria">
+      <p *ngFor="let sub of informe?.ambiental?.subcriterios">
+        <strong>{{ sub.nombre }}:</strong> {{ sub.puntaje }}% - Recomendación: {{ sub.recomendacion }}.
+      </p>
+    </div>
+    <canvas id="chartAmb"></canvas>
+  </div>
+</div>
+
+<hr>
+<h3>Consolidado Global: <span class="report-score">{{ informe?.global?.puntaje }}%</span> - Nivel Global: {{ informe?.global?.nivel }}</h3>
+<canvas id="chartGlobal"></canvas>
+<br>
+<button class="btn" (click)="descargarPDF()">Descargar PDF</button>
+<button class="btn" (click)="descargarExcel()">Descargar Excel</button>
