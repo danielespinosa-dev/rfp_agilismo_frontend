@@ -44,7 +44,6 @@
   </table>
   <p *ngIf="solicitudes.length === 0">No se encontraron solicitudes.</p>
 </div>
-<!-- Agrega esto al final de tu estado.component.html -->
 <div *ngIf="informeVisible" class="modal">
   <div class="modal-content informe-modal">
     <span class="close" (click)="cerrarInforme()">&times;</span>
@@ -71,11 +70,11 @@
           </ul>
         </td></tr>
         <tr>
-          <th>Estado Dimensiones</th>
+          <th>Estado</th>
           <td>
-            <span class="badge ambiental" [class.done]="informeData.Estado?.ambiental==='done'">Ambiental</span>
-            <span class="badge social" [class.done]="informeData.Estado?.social==='done'">Social</span>
-            <span class="badge economica" [class.done]="informeData.Estado?.economica==='done'">Económica</span>
+            <span class="badge ambiental" [class.done]="informeData.Estado?.ambiental==='done'">Económico</span>
+            <span class="badge social" [class.done]="informeData.Estado?.social==='done'">Técnico</span>
+            <span class="badge economica" [class.done]="informeData.Estado?.economica==='done'">Experiencia</span>
           </td>
         </tr>
       </table>
@@ -92,22 +91,26 @@
       <table class="informe-table">
         <thead>
           <tr>
-            <th colspan="6" class="table-title">Criterios Evaluados</th>
+            <th colspan="7" class="table-title">Criterios Evaluados</th>
           </tr>
           <tr>
+            <th>Id</th>
             <th>Criterio</th>
             <th>Porcentaje Cumplimiento</th>
             <th>Porcentaje Máximo</th>
             <th>Comentario</th>
+            <th>Argumento revision</th>
             <th>Subcriterios</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let criterio of args.criterios">
+            <td><b>{{criterio.id}}</b></td>
             <td><b>{{criterio.nombre}}</b></td>
             <td>{{criterio.porcentaje_cumplimiento}}</td>
             <td>{{criterio.porcentaje_maximo}}</td>
             <td>{{criterio.comentario}}</td>
+            <td>{{criterio.argumento_revision}}</td>
             <td>
               <table class="subcriterios-table">
                 <thead>
@@ -116,6 +119,8 @@
                     <th>Porcentaje</th>
                     <th>Comentario</th>
                     <th>Evidencias</th>
+                    <th>Regla Aplicada</th>
+                    <th>Argumento revision</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -130,6 +135,8 @@
                         </li>
                       </ul>
                     </td>
+                    <td>{{sub.rule_applied}}</td>
+                    <td>{{sub.argumento_revision}}</td>
                   </tr>
                 </tbody>
               </table>
@@ -172,11 +179,58 @@
       <table class="informe-table" style="margin-top:24px;">
         <thead>
           <tr>
+            <th colspan="2" class="table-title">Recomendaciones para Revisor</th>
+          </tr>
+          <tr>
+            <th>Recomendación</th>
+            <th>Prioridad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of args.recomendaciones_revisor">
+            <td>{{p.texto}}</td>
+            <td><span class="badge">{{p.prioridad}}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
+            <th colspan="4" class="table-title">Reglas Revisión</th>
+          </tr>
+          <tr>
+            <th>id</th>
+            <th>id criterio</th>
+            <th>regla aplicada</th>
+            <th>aplicada en evidencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of args.evaluation_rules">
+            <td>{{p.id}}</td>
+            <td>{{p.criterion_id}}</td>
+            <td>{{p.rule_applied}}</td>
+            <td>
+              <ul>
+                <li *ngFor="let evidencia of p.applied_on_evidence">
+                  {{evidencia}}
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="informe-table" style="margin-top:24px;">
+        <thead>
+          <tr>
             <th colspan="3" class="table-title">Archivos Revisados</th>
           </tr>
           <tr>
             <th>Archivo</th>
             <th>Descripción</th>
+            <th>Uso en Criterios</th>
             <th>Confianza</th>
           </tr>
         </thead>
@@ -184,6 +238,7 @@
           <tr *ngFor="let a of args.archivos_revisados">
             <td>{{a.filename}}</td>
             <td>{{a.descripcion_contenido_archivo}}</td>
+            <td>{{a.uso_en_criterios}}</td>
             <td>{{a.confidence_score}}</td>
           </tr>
         </tbody>
